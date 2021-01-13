@@ -1,0 +1,8 @@
+packages:
+- flexdashboard
+- ggthemes
+- plotly
+- purrr
+- shiny
+- shinyWidgets
+- virdis
