@@ -16,13 +16,6 @@ $("body").on("shown.bs.tab", "a[data-toggle='tab']", function(e) {
 
 ```{r setup, include=FALSE}
 
-library(shiny)
-library(ggthemes)
-library(viridis)
-library(plotly)
-library(shinyWidgets)
-library(purrr)
-
 long_forecasts <- readRDS("model-outputs/long_forecasts.rds")
 long_forecasts_rt <- readRDS("model-outputs/long_forecasts_rt.rds")
 long_forecasts_ps <- readRDS("model-outputs/long_forecasts_ps.rds")
@@ -35,10 +28,8 @@ ensb_qntls <- readRDS("model-outputs/unweighted_qntls.rds")
 ensb_qntls <- ensb_qntls[ensb_qntls$si == "si_2", ]
 obs <- readRDS("model-outputs/model_input.rds")
 countries <- sort(unique(ensb_qntls$country))
-names(countries) <- snakecase::to_title_case(countries)
-continents <- countrycode::countrycode(
-  names(countries), origin = "country.name", destination = "continent"
-  )
+names(countries) <- to_title_case(countries)
+continents <- countrycode(names(countries), origin = "country.name", destination = "continent")
 ## Organise as list of lists where the upper level is continent
 countries <- list(
   Asia = countries[continents == "Asia"],
@@ -82,7 +73,7 @@ country_weeks <- reactive({
 country_restimate <- reactive({
   restim <- rt_qntls[rt_qntls$country == input$country &
                      rt_qntls$forecast_date %in% input$forecast_week, ]
-  restim <- tidyr::spread(restim, key = quantile, value = out2)
+  restim <- spread(restim, key = quantile, value = out2)
   restim <- restim[rep(seq_len(nrow(restim)), each = 7), ]
   restim <- split(restim, restim$forecast_date) %>%
     map_dfr(
@@ -266,8 +257,8 @@ output$long <- renderPlotly({
   
   pred <- country_long_pred()
   obs_country <- country_obs()
-  pred <- dplyr::left_join(pred, obs_country, by = c("date" = "dates"))
-  pred <- rincewind:::cap_predictions(pred)
+  pred <- left_join(pred, obs_country, by = c("date" = "dates"))
+  pred <- cap_predictions(pred)
   p1b <- ggplot() +
     geom_point(data = obs_country, aes(dates, deaths)) +
     geom_line(data = pred, aes(date, `50%`, group = forecast_week)) +

@@ -1,8 +1,13 @@
 packages:
+- countrycode
+- dplyr
 - flexdashboard
 - ggthemes
 - plotly
 - purrr
+- rincewind
 - shiny
 - shinyWidgets
+- snakecase
+- tidyr
 - virdis
