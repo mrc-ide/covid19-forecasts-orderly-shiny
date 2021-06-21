@@ -11,3 +11,7 @@ packages:
 - snakecase
 - tidyr
 - viridis
+
+package_sources:
+  github:
+  - mrc-ide/rincewind

@@ -15,21 +15,31 @@ $("body").on("shown.bs.tab", "a[data-toggle='tab']", function(e) {
 </script>
 
 ```{r setup, include=FALSE}
-
+use_si <- "si_2"
 long_forecasts <- readRDS("model-outputs/long_forecasts.rds")
 long_forecasts_rt <- readRDS("model-outputs/long_forecasts_rt.rds")
-long_forecasts_ps <- readRDS("model-outputs/long_forecasts_ps.rds")
 
 
 rt_qntls <- readRDS("model-outputs/unweighted_rt_qntls.rds")
-rt_qntls <- rt_qntls[rt_qntls$si == "si_2", ]
+rt_qntls <- rt_qntls[rt_qntls$si == use_si, ]
 
 ensb_qntls <- readRDS("model-outputs/unweighted_qntls.rds")
-ensb_qntls <- ensb_qntls[ensb_qntls$si == "si_2", ]
+ensb_qntls <- ensb_qntls[ensb_qntls$si == use_si, ]
+
 obs <- readRDS("model-outputs/model_input.rds")
+
+## Make sure all columns have desired class
+##long_forecasts$forecast_week <- as.Date(long_forecasts$forecast_week)
+long_forecasts$date <- as.Date(long_forecasts$date)
+
+##long_forecasts_rt$forecast_week <- as.Date(long_forecasts_rt$forecast_week)
+long_forecasts_rt$date <- as.Date(long_forecasts_rt$date)
+
 countries <- sort(unique(ensb_qntls$country))
 names(countries) <- to_title_case(countries)
-continents <- countrycode(names(countries), origin = "country.name", destination = "continent")
+continents <- countrycode(
+  names(countries), origin = "country.name", destination = "continent"
+)
 ## Organise as list of lists where the upper level is continent
 countries <- list(
   Asia = countries[continents == "Asia"],
@@ -42,8 +52,6 @@ forecast_weeks <- seq(
   as.Date("2020-03-08"), to = as.Date("2020-11-29"), by = "7 days"
 )
 names(forecast_weeks) <- forecast_weeks
-
-
 
 country_long_pred <- reactive({
   pred <- long_forecasts[long_forecasts$country == input$country &
@@ -94,14 +102,6 @@ country_long_rt <- reactive({
                               long_forecasts_rt$forecast_week %in% input$forecast_week, ]
   restim
 })
-
-country_long_ps <- reactive({
-  long_forecasts_ps[long_forecasts_ps$country == input$country &
-                    long_forecasts_ps$forecast_week %in% input$forecast_week, ]
-  
-})
-
-
 ```
 
 Sidebar {.sidebar}
@@ -186,13 +186,6 @@ plotlyOutput('scatter', width = "80%")
 
 Row 
 -----------------------------------------------------------------------
-
-### Individual Models
-
-```{r}
-
-
-```
 
 ### Reproduction Number Estimates
 
@@ -300,57 +293,11 @@ plotlyOutput('long', width = "80%")
 Row
 -----------------------------------------------------------------------------
 
-### Proportion of population susceptible
-
-```{r}
-renderPlotly({
-  key <- country_pred()$country # This will uniquely identify tracts for Plotly
-  ps_country <- country_long_ps()
-  p1b <- ggplot(ps_country) +
-    geom_ribbon(
-      aes(
-        x = date, ymin = `2.5%`, ymax = `97.5%`, group = forecast_week
-      ),
-      fill = "black", alpha = 0.3
-    ) +
-    geom_ribbon(
-      aes(
-        x = date, ymin = `25%`, ymax = `75%`, group = forecast_week
-      ), alpha = 0.5
-    ) +
-    geom_line(
-      aes(date, `50%`, group = forecast_week)) +
-    scale_x_date(
-      date_breaks = "3 weeks", limits = c(as.Date("2020-03-01"), NA)
-    ) +
-    ylim(0, 1) +
-    xlab("") +
-    ylab("Reproduction Number") +
-    theme_minimal(base_size = 14) +
-    theme(
-      axis.text.x =
-        element_text(angle = 90, hjust = 0.5, vjust = 0),
-      legend.position = "none"
-    ) 
-
-  g <- ggplotly(p1b, source = 'source') %>%
-    layout(dragmode = 'lasso', 
-           margin = list(l = 100), 
-           font = list(family = 'Open Sans', size = 16))
-  
-  build <- plotly_build(g)
-  
-  build
-    
-})  
-```
-
-
 ### Reproduction Number Estimates
 
 ```{r}
 renderPlotly({
-  key <- country_pred()$country # This will uniquely identify tracts for Plotly
+  key <- country_pred()$country 
   rt_country <- country_long_rt()
   p1b <- ggplot(rt_country) +
     geom_ribbon(
@@ -391,13 +338,6 @@ renderPlotly({
     
 })  
 ```
-
-
-Model performance
-============================================================================
-
-
-
 
 <style>
 
