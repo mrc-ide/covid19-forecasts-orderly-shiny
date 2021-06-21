@@ -15,6 +15,18 @@ $("body").on("shown.bs.tab", "a[data-toggle='tab']", function(e) {
 </script>
 
 ```{r setup, include=FALSE}
+library(countrycode)
+library(dplyr)
+library(ggthemes)
+library(plotly)
+library(purrr)
+library(rincewind)
+library(shiny)
+library(shinyWidgets)
+library(snakecase)
+library(tidyr)
+library(viridis)
+
 use_si <- "si_2"
 long_forecasts <- readRDS("model-outputs/long_forecasts.rds")
 long_forecasts_rt <- readRDS("model-outputs/long_forecasts_rt.rds")
