@@ -1,4 +1,5 @@
 packages:
+- assessr
 - countrycode
 - dplyr
 - flexdashboard
@@ -15,3 +16,4 @@ packages:
 package_sources:
   github:
   - mrc-ide/rincewind
+  - sangeetabhatia03/assessr
