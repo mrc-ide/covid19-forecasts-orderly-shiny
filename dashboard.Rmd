@@ -141,12 +141,20 @@ output$forecast_week <- renderUI({
   )
 })
 ```
-
+Select a country and week(s) to view short- or medium-term forecasts.
+The top panel shows the observed deaths in gray; the solid green
+line shows the median forecast. The shaded interval represents the 95% CrI of forecasts.
+The bottom panel shows the effective reproduction number used to
+produce the forecasts. The solid line in the
+bottom panel is the median estimate of R<sup>curr</sup> for the
+short-term forecasts and R<sup>S</sup>  for the medium-term
+forecasts. The shaded region
+represents the 95% CrI. The dashed red line indicates the R<sup>curr</sup> = 1 threshold.
 
 Short-term forecasts
 ======================================================================
 
-Row
+Row 
 -----------------------------------------------------------------------
 
 ### Ensemble Model
@@ -154,7 +162,7 @@ Row
 ```{r}
 output$scatter <- renderPlotly({
   
-  key <- country_pred()$country # This will uniquely identify tracts for Plotly
+  key <- country_pred()$country 
   pred <- country_pred()
   obs_country <- country_obs()
   p1a <- ggplot() +
@@ -163,13 +171,12 @@ output$scatter <- renderPlotly({
     ) +
     geom_line(
       data = pred, aes(date, `50%`, group = proj),
-      col = "#634d43", size = 1.1
+      size = 1.1, col = "#4a8c6f"
     ) +
     geom_ribbon(
       data = pred,
       aes(x = date, ymin = `2.5%`, ymax = `97.5%`, group = proj),
-      fill = "#634d43",
-      alpha = 0.3
+      fill = "#4a8c6f", alpha = 0.3
     ) +
     scale_x_date(
       date_breaks = "3 weeks", limits = c(as.Date("2020-03-01"), NA)
@@ -180,7 +187,7 @@ output$scatter <- renderPlotly({
     theme(
       axis.text.x =
         element_text(angle = 90, hjust = 0.5, vjust = 0),
-      legend.position = "none"
+      legend.position = "top", legend.title = element_blank()
     ) 
     
   g <- ggplotly(p1a, source = 'source') %>% 
@@ -195,6 +202,7 @@ output$scatter <- renderPlotly({
 })  
 plotlyOutput('scatter', width = "80%")
 ```
+
 
 Row 
 -----------------------------------------------------------------------
@@ -248,10 +256,11 @@ renderPlotly({
 
 ```
 
-Long-term forecasts
+
+Medium-term forecasts
 ============================================================================
 
-Row
+Row 
 ----------------------------------------------------------------------------
 
 ### Forecasts
@@ -266,13 +275,16 @@ output$long <- renderPlotly({
   pred <- cap_predictions(pred)
   p1b <- ggplot() +
     geom_point(data = obs_country, aes(dates, deaths)) +
-    geom_line(data = pred, aes(date, `50%`, group = forecast_week)) +
+    geom_line(
+      data = pred, aes(date, `50%`, group = forecast_week),
+      col = "#4a8c6f"
+    ) +
     geom_ribbon(
       data = pred,
       aes(
         x = date, ymin = `2.5%`, ymax = `97.5%`, group = forecast_week
       ),
-      alpha = 0.3
+      alpha = 0.3, fill = "#4a8c6f"
     ) +
     scale_x_date(
       date_breaks = "3 weeks",
@@ -302,7 +314,7 @@ plotlyOutput('long', width = "80%")
 ```
 <script>console.log(active_tab);</script>
 
-Row
+Row {data-height=350}
 -----------------------------------------------------------------------------
 
 ### Reproduction Number Estimates
@@ -317,11 +329,6 @@ renderPlotly({
         x = date, ymin = `2.5%`, ymax = `97.5%`, group = forecast_week
       ),
       fill = "black", alpha = 0.3
-    ) +
-    geom_ribbon(
-      aes(
-        x = date, ymin = `25%`, ymax = `75%`, group = forecast_week
-      ), alpha = 0.5
     ) +
     geom_line(
       aes(date, `50%`, group = forecast_week)) +
